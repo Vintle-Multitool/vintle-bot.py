@@ -2,17 +2,22 @@
 import requests, json, threading, traceback, ctypes, os
 from colorama import Fore,Back,Style, init
 from bs4 import BeautifulSoup
+
+# Global Variables for threads to share
+globalcsrf_token = None
+
 init()
 def clearscreen():
     os.system('cls')
 
 # Get X-CSRF TOKEN -- SomethingElse
 def getxcsrf(InputCookie):
+    global globalcsrf_token
     token_request = requests.session()
     token_request.cookies['.ROBLOSECURITY'] = InputCookie
     r = token_request.post('https://www.roblox.com/api/item.ashx?')
     try:
-        return r.headers['X-CSRF-TOKEN']
+        globalcsrf_token = r.headers['X-CSRF-TOKEN']
     except:
         return False
 
@@ -30,6 +35,28 @@ def vip_scraper():
         for i in vip_link:
             f.write(f'{i}\n')
 
+# Ally Bot Thread Function -- SomethingElse
+def runallythread(givencookie,GroupId):
+    global globalcsrf_token
+    global proxies
+    while True:
+        targetID = random.randint(1,7728165)
+        selectedproxy = random.choice(proxies)
+        try:
+            ally_request = requests.session()
+            ally_request.cookies['.ROBLOSECURITY'] = givencookie
+            ally_request.headers['X-CSRF-TOKEN'] = csrf_token
+            ally_request = ally_request.post(url='https://groups.roblox.com/v1/groups/'+GroupId+'/relationships/allies/'+str(targetID),proxies={'https':'http://'+selectedproxy})
+            if ally_request.status_code == 200:
+                print('['+Fore.GREEN+'!'+Style.RESET_ALL+'] Sent ally request to '+str(targetID))
+            else:
+                if ally_request.status_code == 403:
+                    getxcsrf(givencookie)
+                else:
+                    if ally_request.status_code == 429:
+                        time.sleep(3)
+        except:
+            time.sleep(2)
 
 
 # Cookie Checker
