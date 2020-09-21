@@ -10,4 +10,5 @@ https://docs.google.com/document/d/1tOYnUcN3YKi3Bw0ADcCXxRKHxjQkQC1ndpUhHRpK1Oo/
   <h5>Proxy Reader</h5>
   <h5>Cookie Reader</h5>
   <h5>Cookie Checker</h5>
+  <h5>Ally Bot Function</h5>
 </html>
