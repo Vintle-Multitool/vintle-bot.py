@@ -1,5 +1,5 @@
 # Imports
-import requests, json, threading, traceback, ctypes, os, time
+import requests, json, threading, traceback, ctypes, os, time, random
 from colorama import Fore,Back,Style, init
 from bs4 import BeautifulSoup
 
@@ -7,6 +7,11 @@ from bs4 import BeautifulSoup
 globalcsrf_token = None
 
 init()
+# Proxies and Cookies
+proxies = open('proxies.txt','r').read().splitlines()
+proxies = [{'https':'http://'+proxy} for proxy in proxies]
+cookies = open('cookies.txt','r').read().splitlines()
+# Funcs
 def clearscreen():
     os.system('cls')
 
@@ -46,7 +51,7 @@ def runallythread(givencookie,GroupId):
             ally_request = requests.session()
             ally_request.cookies['.ROBLOSECURITY'] = givencookie
             ally_request.headers['X-CSRF-TOKEN'] = csrf_token
-            ally_request = ally_request.post(url='https://groups.roblox.com/v1/groups/'+GroupId+'/relationships/allies/'+str(targetID),proxies={'https':'http://'+selectedproxy})
+            ally_request = ally_request.post(url='https://groups.roblox.com/v1/groups/'+GroupId+'/relationships/allies/'+str(targetID),proxies=random.choice(proxies))
             if ally_request.status_code == 200:
                 print('['+Fore.GREEN+'!'+Style.RESET_ALL+'] Sent ally request to '+str(targetID))
             else:
