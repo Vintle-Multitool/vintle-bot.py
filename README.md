@@ -1,8 +1,8 @@
 # Vintle Multitool
 
 + If you forget the functions heres a link to it
--Versatile Features-https://docs.google.com/document/d/1tOYnUcN3YKi3Bw0ADcCXxRKHxjQkQC1ndpUhHRpK1Oo/edit
--Vintle Features-https://docs.google.com/document/d/1t5VyALJm5vaenZKArPzAioQtD4sdYMFmtWdiPVbG6Uc/edit?usp=sharing
++ Versatile Features-https://docs.google.com/document/d/1tOYnUcN3YKi3Bw0ADcCXxRKHxjQkQC1ndpUhHRpK1Oo/edit
++ Vintle Features-https://docs.google.com/document/d/1t5VyALJm5vaenZKArPzAioQtD4sdYMFmtWdiPVbG6Uc/edit?usp=sharing
 
 <html>
   <h3 style="color= green">Completed Work</h3>
