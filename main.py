@@ -48,7 +48,7 @@ def vip_scraper():
     with open("vip_links.txt", 'w') as f:
         for i in vip_link:
             vip_servers += 1
-            print('['+Fore.GREEN+'!'+Style.RESET_ALL']'f' Vip Servers Found {vip_servers}')
+            print('['+Fore.GREEN+'!'+Style.RESET_ALL+']'f' Vip Servers Found {vip_servers}')
             ctypes.windll.kernel32.SetConsoleTitleA(f'Vintle Multitool |')
             f.write(f'{i}\n')
 
