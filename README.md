@@ -1,10 +1,11 @@
 # Vintle Multitool
 
-+ If you forget the functions heres a link to it
++ If you forget the functions heres a link to it 
 <html>
 <a href="https://docs.google.com/document/d/1tOYnUcN3YKi3Bw0ADcCXxRKHxjQkQC1ndpUhHRpK1Oo/edit", target="blank">Versatile Features</a>
-+ Vintle Features-https://docs.google.com/document/d/1t5VyALJm5vaenZKArPzAioQtD4sdYMFmtWdiPVbG6Uc/edit?usp=sharing
-+ Roblox Docs-https://api.roblox.com/docs?useConsolidatedPage=true
+<a href="https://docs.google.com/document/d/1t5VyALJm5vaenZKArPzAioQtD4sdYMFmtWdiPVbG6Uc/edit?usp=sharing", target="blank">Vintle Features</a>
+ <a href="https://api.roblox.com/docs?useConsolidatedPage=true", target="blank">Roblox Docs</a>
+ 
  </html>
 <html>
   <h3 style="color= green">Completed Work</h3>
