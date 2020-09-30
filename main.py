@@ -6,7 +6,9 @@ from bs4 import BeautifulSoup
 from pprint import pprint
 
 init()
-
+# Dummy Variables
+dislike = 0
+like = 0
 # Global Variables for threads to share
 globalcsrf_token = None
 proxies = None
@@ -37,7 +39,7 @@ def init_proxies_and_cookies():
 
 # Funcs
 def input_sys():
-    print(f"{Fore.YELLOW}>>>{Style.RESET_ALL}", end="")
+    print(f"{Fore.MAGENTA}>>> {Style.RESET_ALL}", end="")
     word = input()
     return word
 
@@ -93,8 +95,8 @@ def vip_scraper():
 def runallythread(i, GroupId):
     global globalcsrf_token
     global proxies
+    ally_sent = 0
     while True:
-        ally_sent = 0
         targetID = random.randint(1, 7728165)
         try:
             ally_request = requests.session()
@@ -117,20 +119,18 @@ def runallythread(i, GroupId):
                     + "] Sent ally request to "
                     + str(targetID)
                 )
-                ctypes.windll.kernal32.SetConsoleTitleW(
-                    f"Vintle Multitool | All Requests Sent {ally_sent}"
-                )
+                ctypes.windll.kernal32.SetConsoleTitleW(f"Vintle Multitool | All Requests Sent {ally_sent}")
             else:
                 if ally_request.status_code == 403:
                     getxcsrf(i)
                 else:
                     if ally_request.status_code == 429:
-                        time.sleep(3)
+                        pass
         except:
-            time.sleep(2)
+            pass
 
 
-# Cookie Checker
+# Cookie Checker -- Tvnyl
 def Cookie_checker(i):
     robux_acc = 0
     email_verify = 0
@@ -342,7 +342,7 @@ def StartScreen():
     print(snd)
 
 
-# Favourite Bot
+# Favourite Bot -- Tvnyl
 def favorite(i):
     favorited = 0
     checked = 0
@@ -368,7 +368,7 @@ def favorite(i):
             proxies=random.choice(proxies),
         )
         if r.json()["message"] == "Too Many Attempts":
-            print("[" + Fore.YELLOW + "!" + Style.RESET_ALL + "]")
+            print("[" + Fore.YELLOW + "!" + Style.RESET_ALL + "] Too Many Attempts, Retrying!")
         else:
             favorited += 1
             print(
@@ -377,7 +377,7 @@ def favorite(i):
                 + "!"
                 + Style.RESET_ALL
                 + "]"
-                + " Botted {favorited} favorites to game/asset: {id}"
+                + f" Botted {favorited} favorites to game/asset: {id_}"
             )
     except:
         pass
@@ -386,5 +386,84 @@ def favorite(i):
         f"Vintle Multitool | Favourites Earned {favorited}"
     )
 
+# Universeid getter tvnyl
+def universeID(gameId, cookie):
+    """
+    gameID: int -> ID of the game 
+    cookie: string -> Cookies will be given through a for loop
+    returns Universe ID
+    """
+    try:
+        req = requests.Session()
+        req.cookies[".ROBLOSECURITY"] = cookie
+        r = req.get(
+            "http://www.roblox.com/mobileapi/userinfo", proxies=random.choice(proxies)
+        ).json()
+        r = req.post(
+            "https://www.roblox.com/api/item.ashx?", proxies=random.choice(proxies)
+        )
+        req.headers["X-CSRF-TOKEN"] = r.headers["X-CSRF-TOKEN"]
+    except:
+        print("[" + Fore.RED + "!" + Style.RESET_ALL + "]" + "Invalid Cookie")
+    req1 = req.get(f'https://games.roblox.com/v1/games/multiget-place-details?placeIds={gameId}')
+    universeId = req1.json()[0]['universeId']
+    return universeId
+
+# Game Like or Dislike BOT-- Tvnyl
+def game_vote_bot(gameID, cookie, vote):
+    """
+    gameID: int>str -> ID of the game 
+    cookie: string -> Cookies will be given through a for loop
+    vote: bool -> True (Upvote) or False (Downvote)
+    """
+    if vote==False:
+        ctypes.windll.kernel32.SetConsoleTitleW(
+            f"Vintle Multitool | Dislikes Botted {dislike}"
+        )
+    elif vote==True:
+        ctypes.windll.kernel32.SetConsoleTitleW(
+            f"Vintle Multitool | Likes Botted {like}"
+        )
+    try:
+        req = requests.Session()
+        req.cookies[".ROBLOSECURITY"] = cookie
+        r = req.get(
+            "http://www.roblox.com/mobileapi/userinfo", proxies=random.choice(proxies)
+        ).json()
+        r = req.post(
+            "https://www.roblox.com/api/item.ashx?", proxies=random.choice(proxies)
+        )
+        req.headers["X-CSRF-TOKEN"] = r.headers["X-CSRF-TOKEN"]
+    except:
+        print("[" + Fore.RED + "!" + Style.RESET_ALL + "]" + "Invalid Cookie")
+    id_ = universeID(gameID, cookie)
+    data = {'vote': vote}
+    req2 = req.patch(f"https://games.roblox.com/v1/games/{id_}/user-votes", data=data)
+    if vote == False:
+        dislike += 1
+        print(
+            '['
+            +Fore.LIGHTGREEN_EX
+            +'!'
+            +Style.RESET_ALL
+            +f'] Dislike: {dislike}'
+        )
+        ctypes.windll.kernel32.SetConsoleTitleW(
+            f"Vintle Multitool | Dislikes Botted {dislike}"
+        )
+    elif vote == True:
+        like += 1
+        print(
+            '['
+            +Fore.LIGHTGREEN_EX
+            +'!'
+            +Style.RESET_ALL
+            +f'] Like: {like}'
+        )
+        ctypes.windll.kernel32.SetConsoleTitleW(
+            f"Vintle Multitool | Likes Botted {like}"
+        )        
+
+init_proxies_and_cookies()
 
 # dont Put the inputs in a function
