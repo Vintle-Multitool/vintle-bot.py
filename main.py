@@ -1,5 +1,5 @@
 # Imports
-import requests, json, threading, traceback, ctypes, os, time, random
+import requests, json, threading, traceback, ctypes, os, time, random, webbrowser
 from colorama import Fore, Back, Style, init
 from bs4 import BeautifulSoup
 
@@ -9,6 +9,8 @@ init()
 # Dummy Variables
 dislike = 0
 like = 0
+visit= 0
+ally_sent = 0
 # Global Variables for threads to share
 globalcsrf_token = None
 proxies = None
@@ -32,14 +34,15 @@ def init_proxies_and_cookies():
         ]
 
     global cookies
-
+    print("Cookie format:\n[1] user:pass:cookie\n[2] Only cookie\n")
+    foramt = int(input_sys())
     with open("cookies.txt", "r") as cookies_file:
         cookies = cookies_file.read().splitlines()
 
 
 # Funcs
 def input_sys():
-    print(f"{Fore.MAGENTA}>>> {Style.RESET_ALL}", end="")
+    print(f"{Fore.YELLOW}>>> {Style.RESET_ALL}", end="")
     word = input()
     return word
 
@@ -68,6 +71,46 @@ def getxcsrf(original_cookie: str):
 
     return None
 
+# Auth Ticket Getter -- Tvnyl
+def auth_ticket(cookie, gameid):
+    """
+    Cookie:list -> Passed through for loop
+    """
+    req = requests.Session()
+    req.cookies[".ROBLOSECURITY"] = cookie
+    try:
+        r = req.get("http://www.roblox.com/mobileapi/userinfo").json()
+        r = req.post("https://www.roblox.com/api/item.ashx?")
+        req.headers["X-CSRF-TOKEN"] = r.headers["X-CSRF-TOKEN"]
+    except:
+        print("[" + Fore.RED + "!" + Style.RESET_ALL + "]" + "Invalid Cookie")
+    req.headers.update({'referer': f"https://www.roblox.com/games/{gameid}"})
+    req2 = req.post('https://auth.roblox.com/v1/authentication-ticket')
+    auth_ticket = req2.headers['rbx-authentication-ticket']
+    return auth_ticket
+# Game  Visit Bot
+def visit_bot(cookie, gameID):
+    """
+    Cookie:list -> Passed Through for loop
+    gameID -> ID of chosen game
+    """
+    authTicket = auth_ticket(cookie=cookie, gameid=gameID)
+    req = requests.Session()
+    req.cookies[".ROBLOSECURITY"] = cookie
+    try:
+        r = req.get("http://www.roblox.com/mobileapi/userinfo").json()
+        r = req.post("https://www.roblox.com/api/item.ashx?")
+        req.headers["X-CSRF-TOKEN"] = r.headers["X-CSRF-TOKEN"]
+    except:
+        print("[" + Fore.RED + "!" + Style.RESET_ALL + "]" + "Invalid Cookie") 
+    browser_id = random.randint(1000000, 10000000)    
+    url = "roblox-player:1+launchmode:play+gameinfo:"+authTicket+"+launchtime:"+str(20)+"+placelauncherurl:https%3A%2F%2Fassetgame.roblox.com%2Fgame%2FPlaceLauncher.ashx%3Frequest%3DRequestGame%26browserTrackerId%3D"+str(browser_id)+"%26placeId%3D"+str(gameID)+"%26isPlayTogetherGame%3Dfalse+browsertrackerid:"+str(browser_id)+"+robloxLocale:en_us+gameLocale:en_us"
+    req2 = webbrowser.open(url)
+    visit += 1
+    ctypes.windll.kernel32.SetConsoleTitleW(
+        f"Vintle Multitool | Visits Earned {visit}"
+    )
+
 
 # Vip Scraper -- Tvnyl
 def vip_scraper():
@@ -84,8 +127,11 @@ def vip_scraper():
         for i in vip_link:
             vip_servers += 1
             print(
-                "[" + Fore.GREEN + "!" + Style.RESET_ALL + "]"
-                f" Vip Servers Found {vip_servers}"
+                "[" 
+                + Fore.GREEN 
+                + "!" 
+                + Style.RESET_ALL + "]"
+                + f" Vip Servers Found {vip_servers}"
             )
             ctypes.windll.kernel32.SetConsoleTitleA(f"Vintle Multitool |")
             f.write(f"{i}\n")
@@ -95,7 +141,6 @@ def vip_scraper():
 def runallythread(i, GroupId):
     global globalcsrf_token
     global proxies
-    ally_sent = 0
     while True:
         targetID = random.randint(1, 7728165)
         try:
@@ -467,3 +512,6 @@ def game_vote_bot(gameID, cookie, vote):
 init_proxies_and_cookies()
 
 # dont Put the inputs in a function
+
+#
+#
