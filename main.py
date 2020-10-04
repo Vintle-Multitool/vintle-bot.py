@@ -511,6 +511,30 @@ def game_vote_bot(gameID, cookie, vote):
 
 init_proxies_and_cookies()
 
+class CookieRefresh:
+    def __init__(self, list_of_cookies):
+        if len(list_of_cookies) > 1:
+            list_one, list_two = list_of_cookies[::2], list_of_cookies[1::2]
+
+            for n in range(2):
+                thread = threading.Thread(target=self.run, args=[list_one if n == 1 else list_two])
+                thread.start()
+
+        else:
+            list_one = list_of_cookies
+            self.run(list_one)
+
+    def run(self, lst):
+        for i in lst:
+            try:
+                CSRF = requests.post('https://auth.roblox.com/v2/logout', cookies={'.ROBLOSECURITY': i}).headers['x-csrf-token']
+            except:
+                print(f'[!] Invalid Cookie.')
+                continue
+
+            r = requests.post('https://auth.roblox.com/v2/logout', cookies={'.ROBLOSECURITY': i}, headers={'X-CSRF-TOKEN': CSRF})
+            print(f'[!] Refreshed cookie.')
+
 # dont Put the inputs in a function
 
 #
