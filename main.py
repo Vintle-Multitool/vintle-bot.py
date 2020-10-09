@@ -1,5 +1,6 @@
 # Imports
-import requests, json, traceback, ctypes, os, time, random, webbrowser,threading
+import json, traceback, ctypes, os, time, random, webbrowser,threading
+import requests
 from colorama import Fore, Back, Style, init
 from bs4 import BeautifulSoup
 from pprint import pprint
@@ -478,9 +479,18 @@ def StartScreen():
                 VVV            iiiiiiii  nnnnnn    nnnnnn          ttttttttttt  llllllll   eeeeeeeeeeeeee
     {Fore.RESET}
     {Fore.MAGENTA}███████████████████████████████████████████████████████████████████████████████████████████████████████████{Fore.RESET}
-    """
 
+                    {Fore.BLUE} 1) {Fore.CYAN} N/A          {Fore.BLUE} 7) {Fore.CYAN} N/A          {Fore.BLUE} 13) {Fore.CYAN} N/A         {Fore.BLUE} 19) {Fore.CYAN} N/A
+                    {Fore.BLUE} 2) {Fore.CYAN} N/A          {Fore.BLUE} 8) {Fore.CYAN} N/A          {Fore.BLUE} 14) {Fore.CYAN} N/A         {Fore.BLUE} 20) {Fore.CYAN} N/A
+                    {Fore.BLUE} 3) {Fore.CYAN} N/A          {Fore.BLUE} 9) {Fore.CYAN} N/A          {Fore.BLUE} 15) {Fore.CYAN} N/A         {Fore.BLUE} 21) {Fore.CYAN} N/A
+                    {Fore.BLUE} 4) {Fore.CYAN} N/A          {Fore.BLUE} 10) {Fore.CYAN} N/A         {Fore.BLUE} 16) {Fore.CYAN} N/A         {Fore.BLUE} 22) {Fore.CYAN} N/A
+                    {Fore.BLUE} 5) {Fore.CYAN} N/A          {Fore.BLUE} 11) {Fore.CYAN} N/A         {Fore.BLUE} 17) {Fore.CYAN} N/A         {Fore.BLUE} 23) {Fore.CYAN} N/A
+                    {Fore.BLUE} 6) {Fore.CYAN} N/A          {Fore.BLUE} 12) {Fore.CYAN} N/A         {Fore.BLUE} 18) {Fore.CYAN} N/A         {Fore.BLUE} 24) {Fore.CYAN} N/A
+    
+    {Fore.MAGENTA}███████████████████████████████████████████████████████████████████████████████████████████████████████████{Fore.RESET}
+    """
     print(snd)
+    input_sys()
 
 
 # Favourite Bot -- Tvnyl
@@ -629,3 +639,4 @@ class CookieRefresh:
             print("[" + Fore.RED + "!" + Style.RESET_ALL + "]" + "Invalid Cookie")
 
 init_proxies_and_cookies()
+StartScreen()
