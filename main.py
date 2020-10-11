@@ -661,4 +661,4 @@ class CookieRefresh:
             print("[" + Fore.RED + "!" + Style.RESET_ALL + "]" + "Invalid Cookie")
 
 init_proxies_and_cookies()
-StartScreen()
+
