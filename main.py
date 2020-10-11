@@ -71,6 +71,29 @@ def get_group_members(group_id):
             break
         cursor = response["nextPageCursor"]
     return x
+# Clothing Downloader -- Tvnyl
+def asset_Downloaderv1():
+    id_ = int(input('id: '))
+    req_to_get_template = requests.get(f'https://assetdelivery.roblox.com/v1/asset/?id={id_}')
+
+
+    open(f'configs\config.xml', 'wb').write(req_to_get_template.content)
+    with open(f'configs\config.xml', 'r') as f: 
+        data = f.read() 
+    Bs_data = BeautifulSoup(data, "lxml") 
+    b_unique = Bs_data.find('url').text
+    template_Id = b_unique.split('?')[1].split('=')[1]
+
+    download_image = requests.get(f'https://www.roblox.com/library/{template_Id}')
+    soup = BeautifulSoup(download_image.content, "html.parser")
+    img_temp_link = soup.find('span', class_='thumbnail-span').img['src']
+
+    request_to_download_temp = requests.get(img_temp_link)
+
+    with open(f'clothing\{id_}.jpeg', 'wb') as f:
+        f.write(request_to_download_temp.content)
+
+    open(f'configs\config.xml', 'wb').truncate(0)
 
 # Message Bot
 def message_bot(groupId, id, cookie,subject,body):
