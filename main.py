@@ -1,8 +1,8 @@
 # Imports
-import requests, json, threading, traceback, ctypes, os, time, random, webbrowser
+import json, traceback, ctypes, os, time, random, webbrowser,threading
+import requests
 from colorama import Fore, Back, Style, init
 from bs4 import BeautifulSoup
-
 from pprint import pprint
 
 init()
@@ -15,6 +15,7 @@ ally_sent = 0
 globalcsrf_token = None
 proxies = None
 cookies = None
+passwrd = None
 test_cookie = "_|WARNING:-DO-NOT-SHARE-THIS.--Sharing-this-will-allow-someone-to-log-in-as-you-and-to-steal-your-ROBUX-and-items.|_5AE1B37130EAA77EAA644B7EA561E935CBD1CE4FA76E524052478E7875B2F69A0F326C00CE1E9F484AAD02A7849E54FA6212AF7993695261AB1B6C8E17516C3FE4628B0F96A29FB374449E403E87522BCEF3A4F0A4578D1248643329B272E1A8627F1B78EDC1A0E096944817536E4CDECFBA9A0CE0D2E20C89A3E8BAF7360CA29849038ED99B865B5ED0266BABE4427B373506CB758C9FC2556D7D7014873E5ED5CD44E83928030457E1CF12BDAAA9DDE0F087159EDD85FAA089BC3F192CC55858EE606797AE43B0449BE7938EAD37DCF8659CE827F4CE3BB1B1402BEE8D798FCF8E84339734D92A125DF16CF74A3BD2ACCB4802CF9393667F3056BF1161B5D42F0FA381F040E4C785B4741A7D9AFE396B3A4D18C34500F8B2C0294E0BFD684A2D1BE99F8FDEC77A728083A7D268ED4D5CEF9D8D"
 
 # Init function - Zz
@@ -36,8 +37,15 @@ def init_proxies_and_cookies():
     global cookies
     print("Cookie format:\n[1] user:pass:cookie\n[2] Only cookie\n")
     foramt = int(input_sys())
-    with open("cookies.txt", "r") as cookies_file:
-        cookies = cookies_file.read().splitlines()
+    if format == 1:
+        cookies = [cookie.split(':',2)[2] for cookie in cookies]
+        with open("cookies.txt", "r") as cookies_file:
+            cookies_not = cookies_file.read().splitlines()
+            cookies = [cookie.split(':',2)[2] for cookie in cookies_not]
+            passwrd = [cookie.split(':',2)[1] for cookie in cookies_not]
+    elif format == 2:
+        with open("cookies.txt", "r") as cookies_file:
+            cookies = cookies_file.read().splitlines()
 
 
 # Funcs
@@ -50,7 +58,116 @@ def input_sys():
 def clearscreen():
     os.system("cls")
 
+# Get users in group, returns in table wait im not sure
+def get_group_members(group_id):
+    cursor = ""
+    while True:
+        response = requests.get(url=f"https://groups.roblox.com/v1/groups/{group_id}/users?limit=100&sortOrder=Desc&cursor={cursor}").json()
 
+        x = [e["user"]["userId"] for e in response['data']]
+            # print(e["user"]["userId"])
+
+        if not response["nextPageCursor"]:
+            break
+        cursor = response["nextPageCursor"]
+    return x
+# Clothing Downloader -- Tvnyl
+def asset_Downloaderv1():
+    id_ = int(input('id: '))
+    req_to_get_template = requests.get(f'https://assetdelivery.roblox.com/v1/asset/?id={id_}')
+
+
+    open(f'configs\config.xml', 'wb').write(req_to_get_template.content)
+    with open(f'configs\config.xml', 'r') as f: 
+        data = f.read() 
+    Bs_data = BeautifulSoup(data, "lxml") 
+    b_unique = Bs_data.find('url').text
+    template_Id = b_unique.split('?')[1].split('=')[1]
+
+    download_image = requests.get(f'https://www.roblox.com/library/{template_Id}')
+    soup = BeautifulSoup(download_image.content, "html.parser")
+    img_temp_link = soup.find('span', class_='thumbnail-span').img['src']
+
+    request_to_download_temp = requests.get(img_temp_link)
+
+    with open(f'clothing\{id_}.jpeg', 'wb') as f:
+        f.write(request_to_download_temp.content)
+
+    open(f'configs\config.xml', 'wb').truncate(0)
+
+# Message Bot
+def message_bot(groupId, id, cookie,subject,body):
+    """
+    groupId:str -> groupId target
+    id:int -> Id of user
+    cookie:str -> Cookie
+    subject:str -> Subject of message
+    body:str -> Body of message
+    """
+    req = requests.Session()
+    req.cookies[".ROBLOSECURITY"] = cookie
+    try:
+        r = req.get("http://www.roblox.com/mobileapi/userinfo").json()
+        r = req.post("https://www.roblox.com/api/item.ashx?")
+        req.headers["X-CSRF-TOKEN"] = r.headers["X-CSRF-TOKEN"]
+    except:
+        print("[" + Fore.RED + "!" + Style.RESET_ALL + "]" + " Invalid Cookie")
+    time.sleep(1)
+    print("[" + Fore.BLUE + "!" + Style.RESET_ALL + "]" + " Getting members for target group")
+    members = get_group_members(str(groupId))
+    print("[" + Fore.BLUE + "!" + Style.RESET_ALL + "]" + " Total Members "+str(len(members)))
+    # ok
+    for i in members:
+        headerformat = {
+            "userId": int(i),
+            "subject": subject,
+            "body": body,
+            "recipientId": int(i), # idk the person recieving the messg #look in the development channel at the pic
+            "replyMessageId": 0,
+            "includePreviousMessage": False
+        }
+        req2 = req.post(url='https://privatemessages.roblox.com/v1/messages/send', data=headerformat)
+        if req2.status_code == 200:
+            if req2.json()['message']=="Sorry, an error occurred sending your message.":
+                print("[" + Fore.RED + "!" + Style.RESET_ALL + "]" + " User Message Settings Disabled | Id "+str(i))
+            elif req2.json()['errors']:
+                print("[" + Fore.YELLOW + "!" + Style.RESET_ALL + "]" + " Ratelimited Retrying")
+            else:
+                time.sleep(1)
+                print("[" + Fore.GREEN + "!" + Style.RESET_ALL + "]" + " Sent message to "+str(i))
+                time.sleep(1)
+
+# Email Verifier -- Tvnyl
+def email_verifier(cookie):
+    """
+    cookie:str -> Given through for loop
+    """
+    req = requests.Session()
+    req.cookies[".ROBLOSECURITY"] = cookie
+    try:
+        r = req.get("http://www.roblox.com/mobileapi/userinfo").json()
+        r = req.post("https://www.roblox.com/api/item.ashx?")
+        req.headers["X-CSRF-TOKEN"] = r.headers["X-CSRF-TOKEN"]
+    except:
+        print("[" + Fore.RED + "!" + Style.RESET_ALL + "]" + " Invalid Cookie")
+    generate_email = requests.get('https://www.1secmail.com/api/v1/?action=genRandomMailbox&count=1').json()
+    email = generate_email[0]
+    # Splits
+    login = email.split("@")[0]
+    domain = email.split("@")[1]
+    # Update Email
+    # get messages
+    get_mesgid = requests.get(f'https://www.1secmail.com/api/v1/?action=getMessages&login={login}&domain={domain}').json()
+
+    id_ = get_mesgid[0]['id']
+    message_cont = requests.get(f'https://www.1secmail.com/api/v1/?action=readMessage&login={login}&domain={domain}&id={id_}')
+    content = message_cont.json()['body']
+    # print(content)
+    soup = BeautifulSoup(content, 'html.parser')
+    link = soup.find('a')['href']
+    req2 = req.get(link)
+    print("[" + Fore.GREEN + "!" + Style.RESET_ALL + "]" + " Verified Cookie with "+email)
+    
 # Get X-CSRF TOKEN -- SomethingElse
 def getxcsrf(original_cookie: str):
     """
@@ -88,6 +205,7 @@ def auth_ticket(cookie, gameid):
     req2 = req.post('https://auth.roblox.com/v1/authentication-ticket')
     auth_ticket = req2.headers['rbx-authentication-ticket']
     return auth_ticket
+
 # Game  Visit Bot
 def visit_bot(cookie, gameID):
     """
@@ -96,6 +214,7 @@ def visit_bot(cookie, gameID):
     """
     authTicket = auth_ticket(cookie=cookie, gameid=gameID)
     req = requests.Session()
+    print("Hope you have multiple roblox downloaded....")
     req.cookies[".ROBLOSECURITY"] = cookie
     try:
         r = req.get("http://www.roblox.com/mobileapi/userinfo").json()
@@ -110,6 +229,7 @@ def visit_bot(cookie, gameID):
     ctypes.windll.kernel32.SetConsoleTitleW(
         f"Vintle Multitool | Visits Earned {visit}"
     )
+
 
 
 # Vip Scraper -- Tvnyl
@@ -382,9 +502,17 @@ def StartScreen():
                 VVV            iiiiiiii  nnnnnn    nnnnnn          ttttttttttt  llllllll   eeeeeeeeeeeeee
     {Fore.RESET}
     {Fore.MAGENTA}███████████████████████████████████████████████████████████████████████████████████████████████████████████{Fore.RESET}
+                    {Fore.BLUE} 1) {Fore.CYAN} N/A          {Fore.BLUE} 7) {Fore.CYAN} N/A          {Fore.BLUE} 13) {Fore.CYAN} N/A         {Fore.BLUE} 19) {Fore.CYAN} N/A
+                    {Fore.BLUE} 2) {Fore.CYAN} N/A          {Fore.BLUE} 8) {Fore.CYAN} N/A          {Fore.BLUE} 14) {Fore.CYAN} N/A         {Fore.BLUE} 20) {Fore.CYAN} N/A
+                    {Fore.BLUE} 3) {Fore.CYAN} N/A          {Fore.BLUE} 9) {Fore.CYAN} N/A          {Fore.BLUE} 15) {Fore.CYAN} N/A         {Fore.BLUE} 21) {Fore.CYAN} N/A
+                    {Fore.BLUE} 4) {Fore.CYAN} N/A          {Fore.BLUE} 10) {Fore.CYAN} N/A         {Fore.BLUE} 16) {Fore.CYAN} N/A         {Fore.BLUE} 22) {Fore.CYAN} N/A
+                    {Fore.BLUE} 5) {Fore.CYAN} N/A          {Fore.BLUE} 11) {Fore.CYAN} N/A         {Fore.BLUE} 17) {Fore.CYAN} N/A         {Fore.BLUE} 23) {Fore.CYAN} N/A
+                    {Fore.BLUE} 6) {Fore.CYAN} N/A          {Fore.BLUE} 12) {Fore.CYAN} N/A         {Fore.BLUE} 18) {Fore.CYAN} N/A         {Fore.BLUE} 24) {Fore.CYAN} N/A
+    
+    {Fore.MAGENTA}███████████████████████████████████████████████████████████████████████████████████████████████████████████{Fore.RESET}
     """
-
     print(snd)
+    input_sys()
 
 
 # Favourite Bot -- Tvnyl
@@ -508,10 +636,29 @@ def game_vote_bot(gameID, cookie, vote):
         ctypes.windll.kernel32.SetConsoleTitleW(
             f"Vintle Multitool | Likes Botted {like}"
         )        
+class CookieRefresh:
+    def __init__(self, list_of_cookies):
+        if len(list_of_cookies) > 1:
+            list_one, list_two = list_of_cookies[::2], list_of_cookies[1::2]
+
+            for n in range(2):
+                thread = threading.Thread(target=self.run, args=[list_one if n == 1 else list_two])
+                thread.start()
+
+        else:
+            list_one = list_of_cookies
+            self.run(list_one)
+
+    def run(self, lst):
+        for i in lst:
+            try:
+                CSRF = requests.post('https://auth.roblox.com/v2/logout', cookies={'.ROBLOSECURITY': i}).headers['x-csrf-token']
+            except:
+                print("[" + Fore.RED + "!" + Style.RESET_ALL + "]" + "Invalid Cookie")
+                continue
+
+            r = requests.post('https://auth.roblox.com/v2/logout', cookies={'.ROBLOSECURITY': i}, headers={'X-CSRF-TOKEN': CSRF})
+            print("[" + Fore.RED + "!" + Style.RESET_ALL + "]" + "Invalid Cookie")
 
 init_proxies_and_cookies()
-
-# dont Put the inputs in a function
-
-#
-#
+StartScreen()
